@@ -36,7 +36,7 @@ print(df.isna().sum())
 
 
 # %% KPIS
-df["Faturamento_total"] = df["quantity"] * df["price"].round(2)
+df["Faturamento_total"] = (df["quantity"] * df["price"]).round(2)
 Faturamento_Total = df["Faturamento_total"].sum().round(2) #Faturamento Total
 qtd_venda = df["quantity"].sum().round(2) # Quantidade de produtos vendidos
 Ticket_Medio = (Faturamento_Total/qtd_venda).round(2) # Ticket Medio
