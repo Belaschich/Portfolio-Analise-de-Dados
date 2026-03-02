@@ -7,7 +7,10 @@ Data: 20/02/2026
 # %% Biblioteca
 import pandas as pd
 import numpy as np
+import keyring
 import matplotlib.pyplot as plt
+import mysql.connector
+from sqlalchemy import create_engine
 
 
 # %% Lendo o arquivo
@@ -166,4 +169,47 @@ plt.show()
 
 df.to_csv("Sales.csv", index=False)
 print("Fim!")
-# %%
+# %% fazendo a conexão com o mysql
+c=keyring.get_credential(service_name="Mysql", username=None)
+
+conexao = mysql.connector.connect(
+    host="localhost",
+    user=c.username,
+    password=c.password,
+    database="Sales"
+)
+
+cursor = conexao.cursor()
+print("Conectado com sucesso!")
+
+engine = create_engine(f"mysql+mysqlconnector://{c.username}:{c.password}@localhost/Sales")
+print("Engine criada com sucesso!")
+# %% Criando a Tabela Caso não exista
+query = """
+CREATE TABLE IF NOT EXISTS Sales (
+    Data_Venda DATE,
+    Numero_Nota VARCHAR(50),
+    ID_Cliente VARCHAR(50),
+    Genero VARCHAR(10),
+    Idade INT,
+    Categoria VARCHAR(50),
+    Quantidade INT,
+    Preco DECIMAL(10,2),
+    Faturamento_total DECIMAL(10,2),
+    Forma_Pagamento VARCHAR(50),
+    Shopping VARCHAR(50),
+    Classificacao_Shopping VARCHAR(2),
+    Ticket_Medio_Shopping DECIMAL(10,2),
+    Grupo_Idade VARCHAR(5),
+    Faturamento_Grupo_Idade DECIMAL(10,2),
+    Qtd_venda_Grupo_Idade INT,
+    Ticket_medio_Grupo_Idade DECIMAL(10,2),
+    Ano VARCHAR(4),
+    Mes VARCHAR(2),
+    Mes_Nome VARCHAR(10)
+);
+"""
+# %%Enviar para o MySQL
+df.to_sql("sales", con=engine, if_exists="replace", index=False)
+
+print("Tabela criada com sucesso!")
